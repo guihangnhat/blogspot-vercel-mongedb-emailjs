@@ -4,13 +4,26 @@ import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 
 export default async function handler(req, res) {
+// Cấu hình CORS cho phép Blogspot truy cập
+res.setHeader('Access-Control-Allow-Credentials', true);
 res.setHeader('Access-Control-Allow-Origin', '*');
-res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
+res.setHeader(
+'Access-Control-Allow-Headers',
+'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
+);
 
-if (req.method === 'OPTIONS') return res.status(200).end();
-if (req.method !== 'POST') return res.status(405).json({ message: 'Method Not Allowed' });
+// Xử lý request Preflight (OPTIONS)
+if (req.method === 'OPTIONS') {
+res.status(200).end();
+return;
+}
 
+if (req.method !== 'POST') {
+return res.status(405).json({ message: 'Method Not Allowed' });
+}
+
+try {
 await dbConnect();
 const { name, email, password } = req.body;
 
@@ -34,11 +47,13 @@ isVerified: false,
 verifyToken
 });
 
-// Trả verifyToken về client để gửi email qua EmailJS
 return res.status(201).json({
 message: 'Đăng ký thành công! Đang gửi email kích hoạt...',
 verifyToken,
 email,
 name
 });
+} catch (error) {
+return res.status(500).json({ message: 'Lỗi máy chủ: ' + error.message });
+}
 }
