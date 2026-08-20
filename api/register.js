@@ -4,19 +4,18 @@ import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 
 export default async function handler(req, res) {
-// Cấu hình CORS cho phép Blogspot truy cập
-res.setHeader('Access-Control-Allow-Credentials', true);
+// 1. Khai báo CORS Headers cho mọi request
+res.setHeader('Access-Control-Allow-Credentials', 'true');
 res.setHeader('Access-Control-Allow-Origin', '*');
 res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
 res.setHeader(
 'Access-Control-Allow-Headers',
-'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
+'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization'
 );
 
-// Xử lý request Preflight (OPTIONS)
+// 2. BẮT BỤC: Trả về thành công 200 cho Preflight Request (OPTIONS)
 if (req.method === 'OPTIONS') {
-res.status(200).end();
-return;
+return res.status(200).end();
 }
 
 if (req.method !== 'POST') {
